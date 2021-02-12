@@ -1,6 +1,8 @@
 google_authenticator
 ====================
 
+![molecule test](https://github.com/markcaudill/ansible-role-google-authenticator/workflows/molecule%20test/badge.svg?branch=main)
+
 Configure a Linux host to use Google Authenticator/TOTP
 
 Requirements
