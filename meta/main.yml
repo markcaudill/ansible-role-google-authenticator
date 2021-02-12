@@ -2,7 +2,7 @@ galaxy_info:
   author: Mark Caudill
   description: Configure a Linux host to use Google Authenticator/TOTP
   namespace: markcaudill
-  name: google_authenticator
+  role_name: google_authenticator
   license: MIT
   min_ansible_version: 2.1
   platforms:
