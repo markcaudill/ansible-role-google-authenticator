@@ -1,0 +1,78 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  vars:
+    root_password: root
+    auth_token: 77790760
+    auth_config_content: |
+        UZTNWKEH5M3QTBMUBI34VWUB2Y
+        " RATE_LIMIT 3 30
+        " WINDOW_SIZE 17
+        " DISALLOW_REUSE
+        " TOTP_AUTH
+        {{ auth_token }}
+    auth_config_checksum: "{{ auth_config_content | hash('sha1') }}"
+
+  tasks:
+  - name: install dependencies
+    ansible.builtin.package:
+      name:
+      - 'python*-pexpect'
+
+  - name: add tmp user
+    ansible.builtin.user:
+      name: tmp
+
+  - name: set root password
+    ansible.builtin.user:
+      name: root
+      password: "{{ root_password | password_hash('sha512') }}"
+
+  - name: ensure dummy authenticator data is present
+    ansible.builtin.copy:
+      dest: /root/.google_authenticator
+      owner: root
+      group: root
+      mode: 0400
+      checksum: "{{ auth_config_checksum }}"
+      content: "{{ auth_config_content }}"
+
+  - name: ensure correct python is used
+    ansible.builtin.set_fact:
+      ansible_python_interpreter: /usr/bin/python3
+
+  - name: check for su prompts
+    ansible.builtin.expect:
+      command: /bin/bash -c "su - -c 'su - -c whoami' tmp"
+      responses:
+        Password: "{{ root_password }}"
+        Verification: "{{ auth_token }}"
+    register: su_good_output
+
+  - name: verify that 2fa code was requested
+    assert:
+      that:
+      - "'Password: ' in su_good_output.stdout_lines"
+      - "'Verification code: ' in su_good_output.stdout_lines"
+      - "'root' in su_good_output.stdout_lines"
+
+  - name: check for su prompts again reusing auth_token
+    ansible.builtin.expect:
+      command: /bin/bash -c "su - -c 'su - -c whoami' tmp"
+      responses:
+        Password: "{{ root_password }}"
+        Verification: "{{ auth_token }}"
+    ignore_errors: yes
+    register: su_failed_output
+
+  - name: verify that 2fa code failed
+    assert:
+      that:
+      - "'Password: ' in su_failed_output.stdout_lines"
+      - "'Verification code: ' in su_failed_output.stdout_lines"
+      - "'su: Authentication failure' in su_failed_output.stdout_lines"
+      - "'root' not in su_failed_output.stdout_lines"

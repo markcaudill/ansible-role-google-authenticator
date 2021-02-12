@@ -1,0 +1,26 @@
+---
+# tasks file for google_authenticator
+
+- name: ensure packages are installed
+  package:
+    name: "{{ google_authenticator_packages }}"
+  tags:
+  - google_authenticator
+  - package
+
+- name: ensure pam modules are configured
+  community.general.pamd:
+    name: "{{ item.name }}"
+    type: "{{ item.type }}"
+    control: "{{ item.control }}"
+    module_path: "{{ item.module_path }}"
+    new_type: "{{ item.new_type }}"
+    new_control: "{{ item.new_control }}"
+    new_module_path: "{{ item.new_module_path }}"
+    module_arguments: "{{ item.module_arguments }}"
+    state: "{{ item.state }}"
+    backup: "{{ item.backup }}"
+  loop: "{{ google_authenticator_pam_configurations }}"
+  tags:
+  - google_authenticator'
+  - pamd

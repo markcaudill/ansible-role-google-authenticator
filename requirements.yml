@@ -1,0 +1,5 @@
+---
+roles:
+- name: geerlingguy.repo-epel
+collections:
+- name: community.general

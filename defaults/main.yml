@@ -1,0 +1,20 @@
+---
+# defaults file for google_authenticator
+
+google_authenticator_packages:
+- google-authenticator
+- qrencode-libs
+
+# See <https://github.com/google/google-authenticator-libpam#module-options>
+# and <https://docs.ansible.com/ansible/latest/collections/community/general/pamd_module.html>
+google_authenticator_pam_configurations:
+- name: su
+  type: auth
+  control: include
+  module_path: postlogin
+  new_type: auth
+  new_control: required
+  new_module_path: pam_google_authenticator.so
+  module_arguments: nullok
+  state: before
+  backup: yes

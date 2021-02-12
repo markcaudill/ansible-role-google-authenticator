@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include google_authenticator"
+      include_role:
+        name: "google_authenticator"
