@@ -15,5 +15,4 @@ galaxy_info:
   - 2fa
   - totp
   - pam
-dependencies:
-- geerlingguy.repo-epel
+dependencies: []
